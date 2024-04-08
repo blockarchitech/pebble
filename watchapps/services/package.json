@@ -1,0 +1,54 @@
+{
+  "name": "services",
+  "author": "blockarchitech",
+  "version": "2.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {
+    "pebble-clay": "^1.0.4",
+    "pebblejs": "^1.0.0",
+    "bluebird": "^3.7.2"
+  },
+  "pebble": {
+    "displayName": "Services",
+    "uuid": "810580e8-4d5e-4644-8e53-e213685615c7",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "appId",
+	  "appToken",
+	  "userId",
+	  "declineReason"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "IMAGE_CHECK",
+          "file": "images/check.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "IMAGE_X",
+          "file": "images/x.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "IMAGE_MENU",
+          "file": "images/menu.png"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Pebble Spotify</title>
+        <style>
+            body {
+                margin: 40px auto;
+                max-width: 650px;
+                line-height: 1.6;
+                font-size: 18px;
+                padding: 0 10px;
+                font-family: sans-serif;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            button {
+                font-size: 1em;
+                padding: 0.5em;
+            }
+            #result {
+                margin-top: 1em;
+                font-size: 0.8em;
+                word-wrap: break-word;
+            }
+
+            #result > pre {
+                margin: 0;
+                padding: 0.5em;
+                background-color: #eee;
+                border: 1px solid #ccc;
+            }
+
+            #result > pre > code {
+                white-space: pre-wrap;
+            }
+
+            #result > pre.error {
+                background-color: #fdd;
+                border: 1px solid #f00;
+            }
+
+            #result > pre.success {
+                background-color: #dfd;
+                border: 1px solid #0f0;
+            }
+
+            pre {
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Login with Spotify</h1>
+        <p>
+            <em>
+                Heads up! Don't know what any of this is? Create an app at <a href="https://developer.spotify.com/">Spotify's Developer Dashboard</a> and paste the Client ID here. Make sure to note down the scopes and Redirect URI when creating your app.
+            </em>
+            <br /><br />
+            <em>
+                If you don't trust this page, you can view the source code <a href="https://github.com/blockarchitech/pebble" target="_blank">here</a>.
+            </em>
+        </p>
+        <p>
+            
+                Make sure your redirect URI on Spotify is set to pebblejs://close#<br />
+                <br />
+                Add the following scopes: <pre>user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative user-read-currently-playing user-read-recently-played user-top-read user-read-playback-position user-read-email user-read-private</pre>
+        </p>
+        <br />
+        <br />
+        <p>
+            All done? Paste your client ID below and click the button to login. Something go wrong? Click the "Oops button" to clear all the data.
+            <br />
+            Need help? Ping me on the <a href="https://rebble.io/discord">Rebble discord server</a> (@gibbiemonster)
+        </p>
+        <label for="client_id">Client ID</label>
+        <input type="text" id="client_id" placeholder="Client ID" />
+        <button id="startButton">Login</button>
+        <button id="Clear All">Oops button</button> <!-- This button is for clearing all the data. -->
+        <div id="result"></div>
+        <script>
+            const authorizeEndpoint = "https://accounts.spotify.com/authorize";
+            const tokenEndpoint = "https://accounts.spotify.com/api/token";
+            const clientid_input = document.getElementById("client_id");
+            const clientId = clientid_input.value;
+
+            if (window.location.search) {
+                var args = new URLSearchParams(window.location.search);
+                var code = args.get("code");
+
+                if (code) {
+                    var xhr = new XMLHttpRequest();
+
+                    xhr.onload = function () {
+                        var response = xhr.response;
+                        var message;
+
+                        if (xhr.status == 200) {
+                            message = "Success. Redirecting...";
+                            // Get the config data from the UI elements
+                            var act = response.access_token;
+
+                            // Make a data object to be sent, coercing value types to integers
+                            var options = {
+                                token: act,
+                                expires: response.expires_in,
+                                refresh: response.refresh_token,
+								date: Date.now(),
+                            };
+
+                            // Make a request to get the user ID and username
+                            var xhr2 = new XMLHttpRequest();
+                            xhr2.onload = function () {
+                                var response = xhr2.response;
+                                if (xhr.status == 200) {
+                                    // Add the user ID and username to the options object
+                                    options["user_id"] = response.id;
+                                    options["user_name"] = response.display_name;
+                                } else {
+                                    // Add an error message to the options object
+                                    options["error"] = "Error: " + response.error.message + " (" + response.error.status + ")";
+                                }
+
+                                // Determine the correct return URL (emulator vs real watch)
+                                function getQueryParam(variable, defaultValue) {
+                                    var query = location.search.substring(1);
+                                    var vars = query.split("&");
+                                    for (var i = 0; i < vars.length; i++) {
+                                        var pair = vars[i].split("=");
+                                        if (pair[0] === variable) {
+                                            return decodeURIComponent(pair[1]);
+                                        }
+                                    }
+                                    return defaultValue || false;
+                                }
+                                var return_to = getQueryParam("return_to", "pebblejs://close#");
+
+                                // Encode and send the data when the page closes
+                                document.location = return_to + encodeURIComponent(JSON.stringify(options));
+                            };
+
+							xhr2.responseType = "json";
+							xhr2.open("GET", "https://api.spotify.com/v1/me", true);
+							xhr2.setRequestHeader("Authorization", "Bearer " + act);
+							xhr2.send();
+
+                        } else {
+                            message = "Error: " + response.error_description + " (" + response.error + ")";
+                        }
+
+                        document.getElementById("result").innerHTML = message;
+                    };
+                    xhr.responseType = "json";
+                    xhr.open("POST", tokenEndpoint, true);
+                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xhr.send(
+                        new URLSearchParams({
+                            client_id: clientId,
+                            code_verifier: window.sessionStorage.getItem("code_verifier"),
+                            grant_type: "authorization_code",
+                            redirect_uri: "pebblejs://close#",
+                            code: code,
+                        })
+                    );
+                }
+            }
+
+            document.getElementById("startButton").onclick = function () {
+                var codeVerifier = generateRandomString(64);
+
+                const challengeMethod = "S256";
+
+                Promise.resolve()
+                    .then(() => {
+                        if (challengeMethod === "S256") {
+                            return generateCodeChallenge(codeVerifier);
+                        } else {
+                            return codeVerifier;
+                        }
+                    })
+                    .then(function (codeChallenge) {
+                        window.sessionStorage.setItem("code_verifier", codeVerifier);
+
+                        var redirectUri = "pebblejs://close#";
+                        var args = new URLSearchParams({
+                            response_type: "code",
+                            client_id: clientId,
+                            code_challenge_method: challengeMethod,
+                            code_challenge: codeChallenge,
+                            redirect_uri: redirectUri,
+							scope: "user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative user-read-currently-playing user-read-recently-played user-top-read user-read-playback-position user-read-email user-read-private",
+                        });
+                        window.location = authorizeEndpoint + "/?" + args;
+                    });
+            };
+
+            async function generateCodeChallenge(codeVerifier) {
+                var digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(codeVerifier));
+
+                return btoa(String.fromCharCode(...new Uint8Array(digest)))
+                    .replace(/=/g, "")
+                    .replace(/\+/g, "-")
+                    .replace(/\//g, "_");
+            }
+
+            function generateRandomString(length) {
+                var text = "";
+                var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+                for (var i = 0; i < length; i++) {
+                    text += possible.charAt(Math.floor(Math.random() * possible.length));
+                }
+
+                return text;
+            }
+
+            document.getElementById("Clear All").onclick = function () {
+                // Determine the correct return URL (emulator vs real watch)
+                var options = {};
+                function getQueryParam(variable, defaultValue) {
+                    var query = location.search.substring(1);
+                    var vars = query.split("&");
+                    for (var i = 0; i < vars.length; i++) {
+                        var pair = vars[i].split("=");
+                        if (pair[0] === variable) {
+                            return decodeURIComponent(pair[1]);
+                        }
+                    }
+                    return defaultValue || false;
+                }
+                var return_to = getQueryParam("return_to", "pebblejs://close#");
+
+                // Encode and send the data when the page closes
+                document.location = return_to + encodeURIComponent(JSON.stringify(options));
+            };
+        </script>
+    </body>
+</html>

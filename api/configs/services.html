@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Services Config</title>
+		<style type="text/css">
+			body {
+				font-family: sans-serif;
+				font-size: 14px;
+				line-height: 1.4;
+				padding: 20px;
+			}
+			label {
+				display: block;
+				margin-bottom: 5px;
+			}
+			input[type="text"] {
+				width: 100%;
+				margin-bottom: 10px;
+				padding: 5px;
+			}
+			input[type="submit"] {
+				display: block;
+				width: 100%;
+				padding: 10px;
+				background: #eee;
+				border: 0;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Services Config</h1>
+		<!-- Form to config: App ID, App Token, User ID, and Decline Reason. Form action will trigger JS function when submit is clicked. -->
+		<form action="javascript:configServices()">
+			<label for="appID">App ID:</label>
+			<input type="text" id="appID" name="appID">
+			<label for="appToken">App Token:</label>
+			<input type="text" id="appToken" name="appToken">
+			<label for="userID">User ID:</label>
+			<input type="text" id="userID" name="userID">
+			<label for="declineReason">Decline Reason:</label>
+			<input type="text" id="declineReason" name="declineReason" value="Declined">
+			<input type="submit" value="Submit">
+		</form>
+		<script>
+			function getNeatUsefulStuffFromURL() {
+				var url = window.location.href;
+				var watchModel = getQueryParam('watchModel', 'Unknown');
+				var last4TTN = getQueryParam('last4TTN', 'Unknown');
+				fetch('https://services-backend.blockarchitech.com/appPing?watchModel=' + watchModel + '&last4TTN=' + last4TTN, {
+						method: 'GET',
+						mode: 'cors',
+						cache: 'default'
+					})
+
+			}
+			function getQueryParam(variable, defaultValue) {
+				var query = window.location.search.substring(1);
+				var vars = query.split('&');
+				for (var i = 0; i < vars.length; i++) {
+					var pair = vars[i].split('=');
+					if (pair[0] === variable) {
+						return decodeURIComponent(pair[1]);
+					}
+				}
+				return defaultValue || false;
+			}
+			function configServices() {
+				getNeatUsefulStuffFromURL()
+				var appID = document.getElementById("appID").value;
+				var appToken = document.getElementById("appToken").value;
+				var userID = document.getElementById("userID").value;
+				var declineReason = document.getElementById("declineReason").value;
+				var configData = {
+					"appId": appID,
+					"appToken": appToken,
+					"userId": userID,
+					"declineReason": declineReason
+				}; // Me, an idiot, setting the config data to have lowercase D. This took me 2 hours to figure out.
+				var location = 'pebblejs://close#' + encodeURIComponent(JSON.stringify(configData));
+				document.location = location;
+				
+			}
+		</script>
+	</body>
+</html>
+

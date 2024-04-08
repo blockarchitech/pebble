@@ -1,0 +1,54 @@
+{
+  "name": "Pebble Spotify",
+  "author": "blockarchitech",
+  "version": "1.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {
+    "pebble-clay": "^1.0.4",
+    "pebblejs": "^1.0.0",
+    "bluebird": "^3.7.2"
+  },
+  "pebble": {
+    "displayName": "Pebble Spotify",
+    "uuid": "810580e8-4d5e-4644-8e53-e213685615c7",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "appId",
+      "appToken",
+      "userId",
+      "declineReason"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "IMAGE_PREV",
+          "file": "images/prev.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "IMAGE_NEXT",
+          "file": "images/next.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "IMAGE_PAUSE",
+          "file": "images/pause.png"
+        }
+      ]
+    }
+  }
+}
