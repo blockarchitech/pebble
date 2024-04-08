@@ -8,6 +8,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const spotifyRouter = require('./routes/spotify');
+const servicesRouter = require('./routes/services');
+const analyticsRouter = require('./routes/analytics');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -21,6 +23,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/v1/spotify', spotifyRouter);
+app.use('/api/v1/services', servicesRouter);
+app.use('/analytics', analyticsRouter);
 
 app.get('/', (req, res) => {
     res.send('ok');
