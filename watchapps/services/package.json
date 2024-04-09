@@ -1,7 +1,7 @@
 {
   "name": "services",
   "author": "blockarchitech",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "keywords": [
     "pebble-app"
   ],
@@ -27,9 +27,9 @@
     },
     "messageKeys": [
       "appId",
-	  "appToken",
-	  "userId",
-	  "declineReason"
+      "appToken",
+      "userId",
+      "declineReason"
     ],
     "resources": {
       "media": [
