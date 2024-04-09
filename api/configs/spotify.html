@@ -87,10 +87,10 @@
             const authorizeEndpoint = "https://accounts.spotify.com/authorize";
             const tokenEndpoint = "https://accounts.spotify.com/api/token";
             const clientid_input = document.getElementById("client_id");
-            let clientId = clientid_input.value;
+            const clientId = window.localStorage.getItem("client_id");
 
             document.getElementById("saveClientID").onclick = function () {
-                clientId = clientid_input.value;
+                let clientId = clientid_input.value;
                 window.localStorage.setItem("client_id", clientId);
             };
 
