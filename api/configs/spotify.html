@@ -66,7 +66,7 @@
         </p>
         <p>
             
-                Make sure your redirect URI on Spotify is set to https://pebble.blockarchitech.com/api/configs/spotify.html<br />
+                Make sure your redirect URI on Spotify is set to https://pebble.blockarchitech.com/api/configs/spotify<br />
                 <br />
                 Add the following scopes: <pre>user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative user-read-currently-playing user-read-recently-played user-top-read user-read-playback-position user-read-email user-read-private</pre>
         </p>
@@ -168,7 +168,7 @@
                             client_id: clientId,
                             code_verifier: window.sessionStorage.getItem("code_verifier"),
                             grant_type: "authorization_code",
-                            redirect_uri: "https://pebble.blockarchitech.com/api/configs/spotify.html",
+                            redirect_uri: "https://pebble.blockarchitech.com/api/configs/spotify",
                             code: code,
                         })
                     );
@@ -191,7 +191,7 @@
                     .then(function (codeChallenge) {
                         window.sessionStorage.setItem("code_verifier", codeVerifier);
 
-                        var redirectUri = "https://pebble.blockarchitech.com/api/configs/spotify.html";
+                        var redirectUri = "https://pebble.blockarchitech.com/api/configs/spotify";
                         var args = new URLSearchParams({
                             response_type: "code",
                             client_id: clientId,
