@@ -1,7 +1,7 @@
 // Get a refresh token.
 var { Promise } = require('bluebird');
 
-function refresh(token, refresh_token, created_date) {
+function refresh(token, refresh_token, created_date, client_id) {
 	return new Promise(function (resolve, reject) {
 		// Check if it has been 3600 (1 hour) seconds since the token was created.
 		var current_date = new Date();
@@ -21,9 +21,12 @@ function refresh(token, refresh_token, created_date) {
 						var data = JSON.parse(xhr.responseText);
 						resolve(data.access_token);
 					} else {
+						console.log(JSON.stringify(xhr));
+						var data = JSON.parse(xhr.responseText);
+
 						console.log(JSON.stringify(data));
 						console.error(xhr.statusText);
-						reject(data);
+						reject(JSON.stringify(data));
 					}
 				}
 			}

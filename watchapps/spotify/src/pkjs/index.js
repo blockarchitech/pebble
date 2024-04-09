@@ -96,7 +96,7 @@ Pebble.addEventListener("ready", function (e) {
 			bodyColor: "white",
 		});
 		wait.show();
-		refresh(settings.token, settings.refresh_token, settings.date).then(data => {
+		refresh(settings.token, settings.refresh_token, settings.date, settings.client_id).then(data => {
 			settings.token = data.access_token;
 			settings.date = new Date();
 			localStorage.setItem("clay-settings", settings);
@@ -112,8 +112,8 @@ Pebble.addEventListener("ready", function (e) {
 					subtitle: `Error: ${JSON.stringify(err)}`,
 					scrollable: true,
 					backgroundColor: "black",
-					backgroundColor: "black",
 					titleColor: "white",
+					subtitleColor: "white",
 					bodyColor: "white",
 				});
 				errorCard.show();
@@ -131,6 +131,7 @@ Pebble.addEventListener("ready", function (e) {
 				scrollable: true,
 				backgroundColor: "black",
 				titleColor: "white",
+				subtitleColor: "white",
 				bodyColor: "white",
 			});
 			errorCard.show();
