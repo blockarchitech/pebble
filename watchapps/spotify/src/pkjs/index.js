@@ -63,18 +63,23 @@ Pebble.addEventListener("webviewclosed", function(e) {
 
 
 	// Finish PKCE flow
+	console.log("SETTINGS: " + JSON.stringify(settings));
+	console.log("LOCAL STORAGE: " + localStorage.getItem("clay-settings"));
 
 	if (settings.token == null) {
 
 		var args = decodeURIComponent(e.response);
-		var code = args.get("code");
+		var code = args.split("code=")[1].split("&")[0];
+		console.log("------------CODE: " + code);
 
 		if (code) {
+			console.log("sdjkfnsafjasfdjbsadjkfbsadkjbfsadkjbf");
 			var xhr = new XMLHttpRequest();
 
 			xhr.onload = function() {
 				var response = xhr.response;
 				var message;
+				console.log("XHR1 DONE: " + JSON.stringify(response));
 
 				if (xhr.status == 200) {
 					message = "Success. Redirecting...";
@@ -88,10 +93,12 @@ Pebble.addEventListener("webviewclosed", function(e) {
 						refresh: response.refresh_token,
 						date: Date.now(),
 					};
+					console.log("NEW OPTIONS: " + options);
 
 					// Make a request to get the user ID and username
 					var xhr2 = new XMLHttpRequest();
 					xhr2.onload = function() {
+						console.log("XHR2 DONE: " + JSON.stringify(xhr2.response));
 						var response = xhr2.response;
 						if (xhr.status == 200) {
 							// Add the user ID and username to the options object
@@ -117,6 +124,7 @@ Pebble.addEventListener("webviewclosed", function(e) {
 						// var return_to = getQueryParam("return_to", "pebblejs://close#");
 
 						// Encode and send the data when the page closes
+						console.log("DONE: " + JSON.stringify(options));
 						settings = options
 						localStorage.setItem("clay-settings", settings);
 						console.log("NEW SETTINGS: " + settings);
@@ -132,6 +140,18 @@ Pebble.addEventListener("webviewclosed", function(e) {
 					message = "Error: " + response.error_description + " (" + response.error + ")";
 				}
 			}
+			xhr.responseType = "json";
+        	xhr.open("POST", tokenEndpoint, true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.send(
+                new URLSearchParams({
+                    client_id: clientId,
+					code_verifier: window.sessionStorage.getItem("code_verifier"),
+                    grant_type: "authorization_code",
+                    redirect_uri: "pebblejs://close#",
+                    code: code,
+				})
+            );
 		}
 	}
 });
