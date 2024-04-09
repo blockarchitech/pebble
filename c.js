@@ -3,9 +3,7 @@ var UI = require("pebblejs/dist/js/ui");
 var Settings = require("pebblejs/settings");
 var feature = require("pebblejs/dist/js/platform/feature");
 var voice = require("pebblejs/dist/js/ui/voice");
-var {
-	Promise
-} = require("bluebird");
+var { Promise } = require("bluebird");
 var playFromContextURI = require("./api/playFromContextURI");
 var playTrackOffsetInPlaylist = require("./api/playTrackOffsetInPlaylist");
 var getTracksFromPlaylist = require("./api/getTracksFromPlaylist");
@@ -28,7 +26,7 @@ var devmode = {
 
 
 
-Pebble.addEventListener("showConfiguration", function(e) {
+Pebble.addEventListener("showConfiguration", function (e) {
 	var last4TTN = Pebble.getWatchToken();
 	var watchModel = Pebble.getActiveWatchInfo().model;
 	if (devmode.enabled) {
@@ -42,12 +40,12 @@ Pebble.addEventListener("showConfiguration", function(e) {
 	}
 });
 
-Pebble.addEventListener("webviewclosed", function(e) {
+Pebble.addEventListener("webviewclosed", function (e) {
 	if (e && !e.response) {
 		return;
 	}
 	var dict = decodeURIComponent(e.response);
-
+	
 
 	// Send analytics ping
 	var xhr = new XMLHttpRequest();
@@ -66,79 +64,79 @@ Pebble.addEventListener("webviewclosed", function(e) {
 
 	if (settings.token == null) {
 
-		var args = decodeURIComponent(e.response);
-		var code = args.get("code");
+	var args = decodeURIComponent(e.response);
+    var code = args.get("code");
 
-		if (code) {
-			var xhr = new XMLHttpRequest();
+                if (code) {
+                    var xhr = new XMLHttpRequest();
 
-			xhr.onload = function() {
-				var response = xhr.response;
-				var message;
+                    xhr.onload = function () {
+                        var response = xhr.response;
+                        var message;
 
-				if (xhr.status == 200) {
-					message = "Success. Redirecting...";
-					// Get the config data from the UI elements
-					var act = response.access_token;
+                        if (xhr.status == 200) {
+                            message = "Success. Redirecting...";
+                            // Get the config data from the UI elements
+                            var act = response.access_token;
 
-					// Make a data object to be sent, coercing value types to integers
-					var options = {
-						token: act,
-						expires: response.expires_in,
-						refresh: response.refresh_token,
-						date: Date.now(),
-					};
+                            // Make a data object to be sent, coercing value types to integers
+                            var options = {
+                                token: act,
+                                expires: response.expires_in,
+                                refresh: response.refresh_token,
+								date: Date.now(),
+                            };
 
-					// Make a request to get the user ID and username
-					var xhr2 = new XMLHttpRequest();
-					xhr2.onload = function() {
-						var response = xhr2.response;
-						if (xhr.status == 200) {
-							// Add the user ID and username to the options object
-							options["user_id"] = response.id;
-							options["user_name"] = response.display_name;
-						} else {
-							// Add an error message to the options object
-							options["error"] = "Error: " + response.error.message + " (" + response.error.status + ")";
-						}
+                            // Make a request to get the user ID and username
+                            var xhr2 = new XMLHttpRequest();
+                            xhr2.onload = function () {
+                                var response = xhr2.response;
+                                if (xhr.status == 200) {
+                                    // Add the user ID and username to the options object
+                                    options["user_id"] = response.id;
+                                    options["user_name"] = response.display_name;
+                                } else {
+                                    // Add an error message to the options object
+                                    options["error"] = "Error: " + response.error.message + " (" + response.error.status + ")";
+                                }
 
-						// // Determine the correct return URL (emulator vs real watch)
-						// function getQueryParam(variable, defaultValue) {
-						//     var query = location.search.substring(1);
-						//     var vars = query.split("&");
-						//     for (var i = 0; i < vars.length; i++) {
-						//         var pair = vars[i].split("=");
-						//         if (pair[0] === variable) {
-						//             return decodeURIComponent(pair[1]);
-						//         }
-						//     }
-						//     return defaultValue || false;
-						// }
-						// var return_to = getQueryParam("return_to", "pebblejs://close#");
+                                // // Determine the correct return URL (emulator vs real watch)
+                                // function getQueryParam(variable, defaultValue) {
+                                //     var query = location.search.substring(1);
+                                //     var vars = query.split("&");
+                                //     for (var i = 0; i < vars.length; i++) {
+                                //         var pair = vars[i].split("=");
+                                //         if (pair[0] === variable) {
+                                //             return decodeURIComponent(pair[1]);
+                                //         }
+                                //     }
+                                //     return defaultValue || false;
+                                // }
+                                // var return_to = getQueryParam("return_to", "pebblejs://close#");
 
-						// Encode and send the data when the page closes
-						settings = options
-						localStorage.setItem("clay-settings", settings);
-						console.log("NEW SETTINGS: " + settings);
-						Settings.option(dict);
-					};
+                                // Encode and send the data when the page closes
+                                settings = options
+								localStorage.setItem("clay-settings", settings);
+								console.log("NEW SETTINGS: " + settings);
+								Settings.option(dict);
+                            };
 
-					xhr2.responseType = "json";
-					xhr2.open("GET", "https://api.spotify.com/v1/me", true);
-					xhr2.setRequestHeader("Authorization", "Bearer " + act);
-					xhr2.send();
+							xhr2.responseType = "json";
+							xhr2.open("GET", "https://api.spotify.com/v1/me", true);
+							xhr2.setRequestHeader("Authorization", "Bearer " + act);
+							xhr2.send();
 
-				} else {
-					message = "Error: " + response.error_description + " (" + response.error + ")";
-				}
+                        } else {
+                            message = "Error: " + response.error_description + " (" + response.error + ")";
+                        }
+					}
+				}		
 			}
-		}
-	}
 });
 
 
 
-Pebble.addEventListener("ready", function(e) {
+Pebble.addEventListener("ready", function (e) {
 	// Get the initial configuration
 	settings = JSON.parse(localStorage.getItem("clay-settings")) || {};
 
@@ -212,6 +210,7 @@ Pebble.addEventListener("ready", function(e) {
 
 
 
+
 		// Show splash screen while waiting for data
 		var splashCard = new UI.Card({
 			title: "Loading...",
@@ -243,7 +242,8 @@ Pebble.addEventListener("ready", function(e) {
 				}, {
 					title: "Now Playing",
 					subtitle: "Control the player"
-				}]
+				}
+				]
 			}],
 			backgroundColor: "black",
 			highlightBackgroundColor: "green",
@@ -262,7 +262,7 @@ Pebble.addEventListener("ready", function(e) {
 			mm.show();
 			splashCard.hide();
 		}
-		mm.on("select", function(e) {
+		mm.on("select", function (e) {
 			console.log("Selected item #" + e.itemIndex + " of section #" + e.sectionIndex);
 			if (e == null) {
 				return;
@@ -294,11 +294,11 @@ Pebble.addEventListener("ready", function(e) {
 					});
 
 					// On click, tell spotify to play the playlist
-					resultsMenu.on("select", function(e) {
+					resultsMenu.on("select", function (e) {
 						var playlistid = e.item.playlistid;
 						var playlistname = e.item.playlistname;
 						// Make request to server
-						playFromContextURI(`spotify:playlist:${playlistid}`, settings.token).then(function() {
+						playFromContextURI(`spotify:playlist:${playlistid}`, settings.token).then(function () {
 							if (xhr.readyState === 4) {
 								if (xhr.status === 204) {
 									console.log("Success");
@@ -311,7 +311,7 @@ Pebble.addEventListener("ready", function(e) {
 										bodyColor: "white",
 									});
 									card.show();
-									setTimeout(function() {
+									setTimeout(function () {
 										card.hide();
 									}, 3000);
 								} else {
@@ -328,7 +328,7 @@ Pebble.addEventListener("ready", function(e) {
 									card.show();
 								}
 							}
-						}).catch(function(err) {
+						}).catch(function (err) {
 							console.error(xhr.statusText);
 							var card = new UI.Card({
 								title: "Oh no!",
@@ -343,10 +343,10 @@ Pebble.addEventListener("ready", function(e) {
 						});
 					});
 					// If held, show the tracks in the playlist
-					resultsMenu.on("longSelect", function(e) {
+					resultsMenu.on("longSelect", function (e) {
 						var playlistid = e.item.playlistid;
 						var playlistname = e.item.playlistname;
-						getTracksFromPlaylist(playlistid, settings.token).then(function(data) {
+						getTracksFromPlaylist(playlistid, settings.token).then(function (data) {
 							// Create an array of Menu items
 							var menuItems = [];
 							for (var i = 0; i < data.items.length; i++) {
@@ -371,9 +371,9 @@ Pebble.addEventListener("ready", function(e) {
 							});
 
 							// On click, tell spotify to play the track
-							resultsMenu.on("select", function(e) {
+							resultsMenu.on("select", function (e) {
 								// Make request to server
-								playTrackOffsetInPlaylist(`spotify:playlist:${playlistid}`, e.itemIndex, settings.token).then(function() {
+								playTrackOffsetInPlaylist(`spotify:playlist:${playlistid}`, e.itemIndex, settings.token).then(function () {
 									console.log("Success");
 									var card = new UI.Card({
 										title: "Now Playing",
@@ -384,10 +384,10 @@ Pebble.addEventListener("ready", function(e) {
 										bodyColor: "white",
 									});
 									card.show();
-									setTimeout(function() {
+									setTimeout(function () {
 										card.hide();
 									}, 3000);
-								}).catch(function(err) {
+								}).catch(function (err) {
 									console.error(xhr.statusText);
 									var card = new UI.Card({
 										title: "Oh no!",
@@ -403,7 +403,7 @@ Pebble.addEventListener("ready", function(e) {
 							});
 							resultsMenu.show();
 							splashCard.hide();
-						}).catch(function(err) {
+						}).catch(function (err) {
 							console.error(xhr.statusText);
 							var card = new UI.Card({
 								title: "Oh no!",
@@ -430,7 +430,7 @@ Pebble.addEventListener("ready", function(e) {
 						bodyColor: "white",
 					});
 					errorCard.show();
-					setTimeout(function() {
+					setTimeout(function () {
 						errorCard.hide();
 					}, 3000);
 				});
@@ -459,10 +459,10 @@ Pebble.addEventListener("ready", function(e) {
 						highlightBackgroundColor: "green",
 						textColor: "white",
 					});
-					resultsMenu.on("select", function(e) {
+					resultsMenu.on("select", function (e) {
 						var deviceid = e.item.deviceid;
 						var devicename = e.item.devicename;
-						switchPlayerDevice(deviceid, settings.token).then(function() {
+						switchPlayerDevice(deviceid, settings.token).then(function () {
 							console.log("Success");
 							var card = new UI.Card({
 								title: "Device Changed",
@@ -472,11 +472,11 @@ Pebble.addEventListener("ready", function(e) {
 								bodyColor: "white",
 							});
 							card.show();
-							setTimeout(function() {
+							setTimeout(function () {
 								card.hide();
 							}, 3000);
 
-						}).catch(function(err) {
+						}).catch(function (err) {
 							console.error(xhr.statusText);
 							var card = new UI.Card({
 								title: "Oh no!",
@@ -505,7 +505,7 @@ Pebble.addEventListener("ready", function(e) {
 						bodyColor: "white",
 					});
 					errorCard.show();
-					setTimeout(function() {
+					setTimeout(function () {
 						errorCard.hide();
 					}, 3000);
 				});
@@ -529,17 +529,17 @@ Pebble.addEventListener("ready", function(e) {
 						down: "images/next.png"
 					});
 
-					card.on("click", "up", function(e) {
+					card.on("click", "up", function (e) {
 						changeSpotifyPlayerState("previous", settings.token);
 						// Refresh the card
-						getPlayer(settings.token).then(function(data) {
+						getPlayer(settings.token).then(function (data) {
 							card.title(data.item.name);
 							card.body(`by ${data.item.artists[0].name}`);
 						})
 					});
 
-					card.on("click", "select", function(e) {
-						isPlayerPlaying(settings.token).then(function(isPlaying) {
+					card.on("click", "select", function (e) {
+						isPlayerPlaying(settings.token).then(function (isPlaying) {
 							if (isPlaying) {
 								changeSpotifyPlayerState("pause", settings.token);
 							} else {
@@ -548,9 +548,9 @@ Pebble.addEventListener("ready", function(e) {
 						});
 					});
 
-					card.on("click", "down", function(e) {
+					card.on("click", "down", function (e) {
 						changeSpotifyPlayerState("next", settings.token);
-						getPlayer(settings.token).then(function(data) {
+						getPlayer(settings.token).then(function (data) {
 							card.body(`${data.item.name} by ${data.item.artists[0].name}`);
 						})
 					});
@@ -566,14 +566,14 @@ Pebble.addEventListener("ready", function(e) {
 						bodyColor: "white",
 					});
 					errorCard.show();
-					setTimeout(function() {
+					setTimeout(function () {
 						errorCard.hide();
 					}, 3000);
 				});
 			} else if (e.itemIndex == 3) {
 				// show search
 				// start voice search
-				voice.dictate("start", true, function(e) {
+				voice.dictate("start", true, function (e) {
 					if (e.err) {
 						console.log("Error: " + e.err);
 						var voice_error = new UI.Card({
@@ -586,9 +586,10 @@ Pebble.addEventListener("ready", function(e) {
 							bodyColor: "white",
 						});
 						voice_error.show();
-						setTimeout(function() {
+						setTimeout(function () {
 							voice_error.hide();
-						}, 3000);
+						}
+							, 3000);
 						return;
 					}
 					var search_term = e.transcription;
@@ -618,9 +619,9 @@ Pebble.addEventListener("ready", function(e) {
 						});
 
 						// On click, tell spotify to play the track
-						resultsMenu.on("select", function(e) {
+						resultsMenu.on("select", function (e) {
 							// Make request to server
-							playFromContextURI(`spotify:track:${e.item.trackid}`, settings.token).then(function() {
+							playFromContextURI(`spotify:track:${e.item.trackid}`, settings.token).then(function () {
 								console.log("Success");
 								var card = new UI.Card({
 									title: "Now Playing",
@@ -631,10 +632,10 @@ Pebble.addEventListener("ready", function(e) {
 									bodyColor: "white",
 								});
 								card.show();
-								setTimeout(function() {
+								setTimeout(function () {
 									card.hide();
 								}, 3000);
-							}).catch(function(err) {
+							}).catch(function (err) {
 								var card = new UI.Card({
 									title: "Oh no!",
 									subtitle: "Something went wrong",
@@ -649,7 +650,8 @@ Pebble.addEventListener("ready", function(e) {
 						});
 						// Show the Menu, hide the splash
 						resultsMenu.show();
-					}).catch(err => {
+					}
+					).catch(err => {
 						var card = new UI.Card({
 							title: "Oh no!",
 							subtitle: "Something went wrong",
