@@ -191,7 +191,7 @@
                     .then(function (codeChallenge) {
                         window.sessionStorage.setItem("code_verifier", codeVerifier);
 
-                        var redirectUri = "pebblejs://close#";
+                        var redirectUri = "https://pebble.blockarchitech.com/api/configs/spotify.html";
                         var args = new URLSearchParams({
                             response_type: "code",
                             client_id: clientId,
