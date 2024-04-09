@@ -20,6 +20,7 @@ jobs:
               registry: ghcr.io
               username: ${{github.actor}}
               password: ${{secrets.GITHUB_TOKEN}}
+              permissions: write-all
 
           - name: 'Build'
             run: |
