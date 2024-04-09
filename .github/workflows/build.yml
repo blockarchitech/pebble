@@ -10,6 +10,7 @@ jobs:
         defaults:
           run:
             working-directory: './api'
+        permissions: write-all
         steps:
           - name: 'Checkout'
             uses: actions/checkout@main
@@ -20,7 +21,6 @@ jobs:
               registry: ghcr.io
               username: ${{github.actor}}
               password: ${{secrets.GITHUB_TOKEN}}
-              permissions: write-all
 
           - name: 'Build'
             run: |
