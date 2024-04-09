@@ -79,6 +79,7 @@
         </p>
         <label for="client_id">Client ID</label>
         <input type="text" id="client_id" placeholder="Client ID" />
+        <button id="saveClientID">Save</button>
         <button id="startButton">Login</button>
         <button id="Clear All">Oops button</button> <!-- This button is for clearing all the data. -->
         <div id="result"></div>
@@ -86,7 +87,12 @@
             const authorizeEndpoint = "https://accounts.spotify.com/authorize";
             const tokenEndpoint = "https://accounts.spotify.com/api/token";
             const clientid_input = document.getElementById("client_id");
-            const clientId = clientid_input.value;
+            let clientId = clientid_input.value;
+
+            document.getElementById("saveClientID").onclick = function () {
+                clientId = clientid_input.value;
+                window.localStorage.setItem("client_id", clientId);
+            };
 
             if (window.location.search) {
                 var args = new URLSearchParams(window.location.search);
