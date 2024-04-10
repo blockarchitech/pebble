@@ -47,20 +47,20 @@ Pebble.addEventListener("webviewclosed", function (e) {
 	var dict = decodeURIComponent(e.response);
 	settings = dict
 	localStorage.setItem("clay-settings", settings);
-	console.log("NEW SETTINGS: " + settings);
+	
 	Settings.option(dict);
 
 	// Send analytics ping
 	var xhr = new XMLHttpRequest();
 	xhr.open("PUT", "https://pebble.blockarchitech.com/api/v1/spotify/analytics", true);
 	xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.send(JSON.stringify({
-		"watchModel": Pebble.getActiveWatchInfo().model,
-		"appVersion": "1.0",
-		"platform": Pebble.getActiveWatchInfo().platform,
-		"timestamp": new Date().toISOString(),
-		"watchToken": Pebble.getWatchToken()
-	}));
+	// xhr.send(JSON.stringify({
+	// 	"watchModel": Pebble.getActiveWatchInfo().model,
+	// 	"appVersion": "1.0",
+	// 	"platform": Pebble.getActiveWatchInfo().platform,
+	// 	"timestamp": new Date().toISOString(),
+	// 	"watchToken": Pebble.getWatchToken()
+	// }));
 
 	
 });
@@ -78,10 +78,9 @@ Pebble.addEventListener("ready", function (e) {
 			title: "Configure me!",
 			body: "Please open the Pebble app on your phone and set your settings.",
 			scrollable: true,
-			backgroundColor: "black",
-			titleColor: "green",
-			bodyColor: "white",
-			icon: "images/next.png"
+			
+			icon: "images/next.png",
+			
 		});
 		card.show();
 	} else {
@@ -91,30 +90,25 @@ Pebble.addEventListener("ready", function (e) {
 			title: "Please wait",
 			body: "Getting a refresh token...",
 			scrollable: false,
-			backgroundColor: "black",
-			titleColor: "green",
-			bodyColor: "white",
+			
+			
 		});
 		wait.show();
 		refresh(settings.token, settings.refresh_token, settings.date, settings.client_id).then(data => {
-			settings.token = data.access_token;
-			settings.date = new Date();
+			settings.token = data;
+			settings.date = new Date().getTime();
 			localStorage.setItem("clay-settings", settings);
 			Settings.option(settings);
 			wait.hide();
 
-			getUserPlaylists(settings.token).then(data => {
+			getUserPlaylists(settings.token, settings.user_id).then(data => {
 				return;
 			}).catch(err => {
-				console.log(err)
+				
 				var errorCard = new UI.Card({
 					title: "API Error",
 					subtitle: `Error: ${JSON.stringify(err)}`,
-					scrollable: true,
-					backgroundColor: "black",
-					titleColor: "white",
-					subtitleColor: "white",
-					bodyColor: "white",
+					scrollable: true,		
 				});
 				errorCard.show();
 				splashCard.hide();
@@ -124,15 +118,12 @@ Pebble.addEventListener("ready", function (e) {
 
 		}).catch(err => {
 			wait.hide();
-			console.log(err)
+			
 			var errorCard = new UI.Card({
 				title: "API Error",
 				subtitle: `Couldn't refresh token: ${err}`,
 				scrollable: true,
-				backgroundColor: "black",
-				titleColor: "white",
-				subtitleColor: "white",
-				bodyColor: "white",
+				
 			});
 			errorCard.show();
 			splashCard.hide();
@@ -148,19 +139,11 @@ Pebble.addEventListener("ready", function (e) {
 			title: "Loading...",
 			subtitle: "Fetching data from the server",
 			scrollable: false,
-			backgroundColor: "black",
-			titleColor: "white",
-			bodyColor: "white",
+			
 		});
 
 		splashCard.show();
 
-
-
-
-		// Make request to server
-		var last4TTN = Pebble.getWatchToken();
-		var watchModel = Pebble.getActiveWatchInfo().model;
 		// show main menu
 		var mm = new UI.Menu({
 			sections: [{
@@ -177,9 +160,7 @@ Pebble.addEventListener("ready", function (e) {
 				}
 				]
 			}],
-			backgroundColor: "black",
-			highlightBackgroundColor: "green",
-			textColor: "white",
+			
 		});
 		if (feature.microphone) {
 			// add search menu item
@@ -188,20 +169,20 @@ Pebble.addEventListener("ready", function (e) {
 				subtitle: "Search for a song"
 			});
 		}
-		if (donotrun == false) {
+		if (donotrun == true) {
 			mm.hide();
 		} else {
 			mm.show();
 			splashCard.hide();
 		}
 		mm.on("select", function (e) {
-			console.log("Selected item #" + e.itemIndex + " of section #" + e.sectionIndex);
+			
 			if (e == null) {
 				return;
 			}
 			if (e.itemIndex == 0) {
 				// show playlists
-				getUserPlaylists(settings.token).then(data => {
+				getUserPlaylists(settings.token, settings.user_id).then(data => {
 					// Create an array of Menu items
 					var menuItems = [];
 					for (var i = 0; i < data.items.length; i++) {
@@ -220,9 +201,7 @@ Pebble.addEventListener("ready", function (e) {
 							title: `${settings.user_name}'s Playlists`,
 							items: menuItems
 						}],
-						backgroundColor: "black",
-						highlightBackgroundColor: "green",
-						textColor: "white",
+						
 					});
 
 					// On click, tell spotify to play the playlist
@@ -231,45 +210,25 @@ Pebble.addEventListener("ready", function (e) {
 						var playlistname = e.item.playlistname;
 						// Make request to server
 						playFromContextURI(`spotify:playlist:${playlistid}`, settings.token).then(function () {
-							if (xhr.readyState === 4) {
-								if (xhr.status === 204) {
-									console.log("Success");
+									
 									var card = new UI.Card({
 										title: "Now Playing",
 										body: `'${playlistname}'`,
 										scrollable: true,
-										backgroundColor: "black",
-										titleColor: "white",
-										bodyColor: "white",
+										
 									});
 									card.show();
 									setTimeout(function () {
 										card.hide();
 									}, 3000);
-								} else {
-									console.error(xhr.statusText);
-									var card = new UI.Card({
-										title: "Oh no!",
-										subtitle: "Something went wrong",
-										body: `${xhr.responseText}`,
-										scrollable: true,
-										backgroundColor: "black",
-										titleColor: "white",
-										bodyColor: "white",
-									});
-									card.show();
-								}
-							}
+							
 						}).catch(function (err) {
-							console.error(xhr.statusText);
 							var card = new UI.Card({
 								title: "Oh no!",
 								subtitle: "Something went wrong",
 								body: `${err}`,
 								scrollable: true,
-								backgroundColor: "black",
-								titleColor: "white",
-								bodyColor: "white",
+
 							});
 							card.show();
 						});
@@ -297,23 +256,19 @@ Pebble.addEventListener("ready", function (e) {
 									title: `${playlistname}`,
 									items: menuItems
 								}],
-								backgroundColor: "black",
-								highlightBackgroundColor: "green",
-								textColor: "white",
+								
 							});
 
 							// On click, tell spotify to play the track
 							resultsMenu.on("select", function (e) {
 								// Make request to server
 								playTrackOffsetInPlaylist(`spotify:playlist:${playlistid}`, e.itemIndex, settings.token).then(function () {
-									console.log("Success");
+									
 									var card = new UI.Card({
 										title: "Now Playing",
 										body: `'${e.item.trackname}'`,
 										scrollable: true,
-										backgroundColor: "black",
-										titleColor: "white",
-										bodyColor: "white",
+										
 									});
 									card.show();
 									setTimeout(function () {
@@ -326,9 +281,7 @@ Pebble.addEventListener("ready", function (e) {
 										subtitle: "Something went wrong",
 										body: `${err}`,
 										scrollable: true,
-										backgroundColor: "black",
-										titleColor: "white",
-										bodyColor: "white",
+										
 									});
 									card.show();
 								});
@@ -342,9 +295,7 @@ Pebble.addEventListener("ready", function (e) {
 								subtitle: "Something went wrong",
 								body: `${err}`,
 								scrollable: true,
-								backgroundColor: "black",
-								titleColor: "white",
-								bodyColor: "white",
+
 							});
 							card.show();
 						});
@@ -357,9 +308,7 @@ Pebble.addEventListener("ready", function (e) {
 						subtitle: "Something went wrong",
 						body: `${err}`,
 						scrollable: true,
-						backgroundColor: "black",
-						titleColor: "white",
-						bodyColor: "white",
+						
 					});
 					errorCard.show();
 					setTimeout(function () {
@@ -381,27 +330,31 @@ Pebble.addEventListener("ready", function (e) {
 						});
 					}
 
+					if (data.devices.length === 0) {
+						menuItems.push({
+							title: "No devices found",
+							subtitle: "Please open Spotify on a device",
+							deviceid: "none",
+							devicename: "none"
+						});
+					}
+
 					// Construct Menu to show to user
 					var resultsMenu = new UI.Menu({
 						sections: [{
 							title: `${settings.user_name}'s Devices`,
 							items: menuItems
 						}],
-						backgroundColor: "black",
-						highlightBackgroundColor: "green",
-						textColor: "white",
 					});
 					resultsMenu.on("select", function (e) {
 						var deviceid = e.item.deviceid;
 						var devicename = e.item.devicename;
 						switchPlayerDevice(deviceid, settings.token).then(function () {
-							console.log("Success");
+							
 							var card = new UI.Card({
 								title: "Device Changed",
 								body: `'${devicename}'`,
-								backgroundColor: "black",
-								titleColor: "white",
-								bodyColor: "white",
+
 							});
 							card.show();
 							setTimeout(function () {
@@ -415,9 +368,7 @@ Pebble.addEventListener("ready", function (e) {
 								subtitle: "Something went wrong",
 								body: `${err}`,
 								scrollable: true,
-								backgroundColor: "black",
-								titleColor: "white",
-								bodyColor: "white",
+
 							});
 							card.show();
 						});
@@ -432,9 +383,7 @@ Pebble.addEventListener("ready", function (e) {
 						subtitle: "Something went wrong",
 						body: `${err}`,
 						scrollable: true,
-						backgroundColor: "black",
-						titleColor: "white",
-						bodyColor: "white",
+						
 					});
 					errorCard.show();
 					setTimeout(function () {
@@ -448,11 +397,9 @@ Pebble.addEventListener("ready", function (e) {
 					var menuItems = [];
 					var card = new UI.Card({
 						title: `${data.item.name}`,
-						subtitle: `${data.item.name} by ${data.item.artists[0].name}`,
+						body: `by ${data.item.artists[0].name}`,
 						scrollable: false,
-						backgroundColor: "black",
-						titleColor: "white",
-						bodyColor: "white",
+						
 					});
 
 					card.action({
@@ -467,8 +414,18 @@ Pebble.addEventListener("ready", function (e) {
 						getPlayer(settings.token).then(function (data) {
 							card.title(data.item.name);
 							card.body(`by ${data.item.artists[0].name}`);
-						})
-					});
+						}).catch(function (err) {
+							console.error(xhr.statusText);
+							var card = new UI.Card({
+								title: "Oh no!",
+								subtitle: "Something went wrong",
+								body: `${err}`,
+								scrollable: true,
+								
+							});
+							card.show();
+						});
+					})
 
 					card.on("click", "select", function (e) {
 						isPlayerPlaying(settings.token).then(function (isPlaying) {
@@ -483,8 +440,19 @@ Pebble.addEventListener("ready", function (e) {
 					card.on("click", "down", function (e) {
 						changeSpotifyPlayerState("next", settings.token);
 						getPlayer(settings.token).then(function (data) {
-							card.body(`${data.item.name} by ${data.item.artists[0].name}`);
-						})
+							card.title(data.item.name);
+							card.body(`by ${data.item.artists[0].name}`);
+						}).catch(function (err) {
+							console.error(xhr.statusText);
+							var card = new UI.Card({
+								title: "Oh no!",
+								subtitle: "Something went wrong",
+								body: `${err}`,
+								scrollable: true,
+								
+							});
+							card.show();
+						});
 					});
 					card.show();
 				}).catch(err => {
@@ -493,9 +461,7 @@ Pebble.addEventListener("ready", function (e) {
 						subtitle: "Something went wrong",
 						body: `${err}`,
 						scrollable: true,
-						backgroundColor: "black",
-						titleColor: "white",
-						bodyColor: "white",
+						
 					});
 					errorCard.show();
 					setTimeout(function () {
@@ -507,15 +473,13 @@ Pebble.addEventListener("ready", function (e) {
 				// start voice search
 				voice.dictate("start", true, function (e) {
 					if (e.err) {
-						console.log("Error: " + e.err);
+						
 						var voice_error = new UI.Card({
 							title: "Error",
 							subtitle: "Voice search failed",
 							body: e.err,
 							scrollable: true,
-							backgroundColor: "black",
-							titleColor: "white",
-							bodyColor: "white",
+							
 						});
 						voice_error.show();
 						setTimeout(function () {
@@ -545,23 +509,19 @@ Pebble.addEventListener("ready", function (e) {
 								title: `Search results for '${search_term}'`,
 								items: menuItems
 							}],
-							backgroundColor: "black",
-							highlightBackgroundColor: "green",
-							textColor: "white",
+							
 						});
 
 						// On click, tell spotify to play the track
 						resultsMenu.on("select", function (e) {
 							// Make request to server
 							playFromContextURI(`spotify:track:${e.item.trackid}`, settings.token).then(function () {
-								console.log("Success");
+								
 								var card = new UI.Card({
 									title: "Now Playing",
 									body: `'${e.item.trackname}'`,
 									scrollable: true,
-									backgroundColor: "black",
-									titleColor: "white",
-									bodyColor: "white",
+									
 								});
 								card.show();
 								setTimeout(function () {
@@ -573,9 +533,7 @@ Pebble.addEventListener("ready", function (e) {
 									subtitle: "Something went wrong",
 									body: `${err}`,
 									scrollable: true,
-									backgroundColor: "black",
-									titleColor: "white",
-									bodyColor: "white",
+									
 								});
 								card.show();
 							});
@@ -589,15 +547,13 @@ Pebble.addEventListener("ready", function (e) {
 							subtitle: "Something went wrong",
 							body: `${err}`,
 							scrollable: true,
-							backgroundColor: "black",
-							titleColor: "white",
-							bodyColor: "white",
+							
 						});
 						card.show();
 					});
 				});
 			} else {
-				console.log("Error: Unknown itemIndex");
+				console.log("Unknown menu item selected");
 			}
 		});
 	}

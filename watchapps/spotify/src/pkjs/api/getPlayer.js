@@ -16,6 +16,9 @@ function getPlayer(token) {
 				}
 			}
 		}
+
+		xhr.setRequestHeader("Authorization", "Bearer " + token);
+		xhr.send();
 	});
 }
 

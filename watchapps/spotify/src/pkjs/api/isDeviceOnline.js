@@ -20,5 +20,9 @@ function isDeviceOnline(token) {
 				}
 			}
 		}
+		xhr.setRequestHeader("Authorization", "Bearer " + token);
+		xhr.send();
 	});
 }
+
+module.exports = isDeviceOnline;

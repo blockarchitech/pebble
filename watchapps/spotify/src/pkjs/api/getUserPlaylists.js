@@ -11,7 +11,6 @@ function getUserPlaylists(token, uid) {
 					var data = JSON.parse(xhr.responseText);
 					resolve(data);
 				} else {
-					console.error(xhr.statusText);
 					reject(xhr.statusText);
 				}
 			}
