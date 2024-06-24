@@ -1,0 +1,34 @@
+{
+  "name": "transit",
+  "author": "MakeAwesomeHappen",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "transit",
+    "uuid": "00c6f98f-276e-4045-8078-8326f09b982f",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "RequestStops",
+      "Stop_Name",
+      "Stop_Next_Time_Minutes",
+      "Stop_Destination",
+      "Stop_Color",
+      "Stop_Highlight"
+    ],
+    "resources": {
+      "media": []
+    }
+  }
+}
