@@ -2,7 +2,7 @@
 #include "transit.h"
 #include "scrolling_menu.h"
 
-#define MAX_STOPS 10
+#define MAX_STOPS 90
 
 static Window *s_main_window;
 static MenuLayer *s_menu_layer;
@@ -133,9 +133,10 @@ void transit_add_stop(char *name, int next_time_minutes, char *destination, GCol
         menu_items[s_num_stops].subtext = destination;
         menu_items[s_num_stops].flags = ITEM_FLAG_TWO_LINER;
 
-        s_num_stops++;
-        
-        // Refresh the menu layer to reflect changes
-        menu_layer_reload_data(s_menu_layer);
+        s_num_stops++;   
     }
+}
+
+void refresh_menu(void) {
+    menu_layer_reload_data(s_menu_layer);
 }

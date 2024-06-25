@@ -4,6 +4,13 @@
 // setup pebblekitjs to add stop
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
     // message keys are Stop_Name, Stop_Next_Time_Minutes, Stop_Destination, Stop_Color, Stop_Highlight_Color
+
+    Tuple *refresh_menu_tuple = dict_find(iterator, MESSAGE_KEY_RefreshMenu);
+    if (refresh_menu_tuple) {
+        refresh_menu();
+        return;
+    }
+
     Tuple *name_tuple = dict_find(iterator, MESSAGE_KEY_Stop_Name);
     Tuple *next_time_tuple = dict_find(iterator, MESSAGE_KEY_Stop_Next_Time_Minutes);
     Tuple *destination_tuple = dict_find(iterator, MESSAGE_KEY_Stop_Destination);
@@ -24,8 +31,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
 
     // Add the stop to the list
-    transit_add_stop(name, next_time, destination, color, highlight_color);
-
+    transit_add_stop(name, next_time, destination, color, highlight_color);    
 }
 
 // on fail

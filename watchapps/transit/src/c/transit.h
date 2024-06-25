@@ -16,4 +16,5 @@ typedef struct {
 void transit_init(void);
 void transit_deinit(void);
 void transit_add_stop(char *name, int next_time_minutes, char *destination, GColor color, GColor highlight_color);
+void refresh_menu(void);
 MenuItem* getMenuItem(WindowData* window_data, int index);

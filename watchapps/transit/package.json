@@ -2,9 +2,13 @@
   "name": "transit",
   "author": "MakeAwesomeHappen",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "bluebird": "^3.7.2"
+  },
   "pebble": {
     "displayName": "transit",
     "uuid": "00c6f98f-276e-4045-8078-8326f09b982f",
@@ -25,7 +29,8 @@
       "Stop_Next_Time_Minutes",
       "Stop_Destination",
       "Stop_Color",
-      "Stop_Highlight"
+      "Stop_Highlight",
+      "RefreshMenu"
     ],
     "resources": {
       "media": []
